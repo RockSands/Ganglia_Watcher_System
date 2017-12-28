@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="diskInfo">
+	<typeAlias alias="diskInfor" type="com.cmcc.bcebs.watcher.db.bean.disk.DiskInfo" />
+	<select id="getDiskListByPCID" parameterClass="String" resultClass="diskInfor">
+		SELECT 
+			DISK_ID as disk_id, 
+			PC_ID as pc_id, 
+			Raid_ID as raid_id,
+			KERNEL as kernel,
+			SERIAL as serial,
+			PATH as path, 
+			CHANNEL as channel, 
+			SIZE as size, 
+			STATUS_USED as status_used, 
+			STATUS_HEALTH as status_health,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM EBS_PS_DISK_INFO_T
+		WHERE pc_id=#pc_id#
+	</select>
+	
+	<insert id="insertDiskInfo" parameterClass="diskInfor">
+		INSERT INTO
+			ebs_ps_disk_info_t(
+			DISK_ID,
+			PC_ID,
+			SERIAL,
+			KERNEL,
+			CHANNEL,
+			PATH,
+			SIZE,
+			CREATE_TIME,
+			UPDATE_TIME
+			)
+		VALUES(#disk_id#,#pc_id#,#serial#,#kernel#,#channel#,#path#,#size#,str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S'),str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S'));
+	</insert>
+	
+	<update id="updateDiskInfo" parameterClass="diskInfor">
+		UPDATE EBS_PS_DISK_INFO_T 
+		SET <isNotEmpty property="pc_id">
+				PC_ID = #pc_id#,
+			</isNotEmpty>
+			<isNotEmpty property="raid_id">
+				Raid_ID = #raid_id#,
+			</isNotEmpty>
+			<isNotEmpty property="serial">
+				SERIAL = #serial#,
+			</isNotEmpty>
+			<isNotEmpty property="kernel">
+				KERNEL = #kernel#,
+			</isNotEmpty>
+			<isNotEmpty property="channel">
+				CHANNEL = #channel#,
+			</isNotEmpty>
+			<isNotEmpty property="path">
+				PATH = #path#,
+			</isNotEmpty>
+			<isNotEmpty property="size">
+				SIZE = #size#,
+			</isNotEmpty>
+			<isNotEmpty property="status_swap">
+				STATUS_SWAP = #status_swap#,
+			</isNotEmpty>
+			<isNotEmpty property="status_used">
+				STATUS_USED = #status_used#,
+			</isNotEmpty>
+			<isNotEmpty property="status_health">
+				STATUS_HEALTH = #status_health#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE DISK_ID = #disk_id#
+	</update>
+</sqlMap>
+	

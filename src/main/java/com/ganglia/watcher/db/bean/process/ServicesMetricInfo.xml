@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="servicesMetricInfo">
+	<typeAlias alias="servicesMetricInfor" type="com.cmcc.bcebs.watcher.db.bean.process.ServicesMetricInfo" />
+
+	<insert id="insertServicesMetricInfo" parameterClass="servicesMetricInfor">
+		INSERT INTO
+			ebs_service_metric_info_t(
+			SERVICE_METRIC_ID,
+			SERVICE_ID,
+			REPORT_TIME,
+			STATUS,
+			CREATE_TIME
+			)
+		VALUES(
+			#service_metric_id#,
+			#service_id#,
+			#report_time#,
+			#status#,
+			str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S')
+		);
+	</insert>
+</sqlMap>
+	

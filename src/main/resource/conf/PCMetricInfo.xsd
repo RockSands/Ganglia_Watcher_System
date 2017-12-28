@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="GANGLIA_XML">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="CLUSTER"/>
+			</xs:sequence>
+			<xs:attribute name="SOURCE" type="xs:NCName" use="required"/>
+			<xs:attribute name="VERSION" type="xs:NMTOKEN" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CLUSTER">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="HOST" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="LATLONG" type="xs:NCName" use="required"/>
+			<xs:attribute name="LOCALTIME" type="xs:integer" use="required"/>
+			<xs:attribute name="NAME" type="xs:NCName" use="required"/>
+			<xs:attribute name="OWNER" type="xs:NCName" use="required"/>
+			<xs:attribute name="URL" type="xs:NCName" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="HOST">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="METRIC" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="DMAX" type="xs:integer" use="required"/>
+			<xs:attribute name="GMOND_STARTED" type="xs:integer" use="required"/>
+			<xs:attribute name="IP" type="xs:NMTOKEN" use="required"/>
+			<xs:attribute name="LOCATION" type="xs:NCName" use="required"/>
+			<xs:attribute name="NAME" type="xs:NMTOKEN" use="required"/>
+			<xs:attribute name="REPORTED" type="xs:integer" use="required"/>
+			<xs:attribute name="TAGS" use="required"/>
+			<xs:attribute name="TMAX" type="xs:integer" use="required"/>
+			<xs:attribute name="TN" type="xs:integer" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="METRIC">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EXTRA_DATA"/>
+			</xs:sequence>
+			<xs:attribute name="DMAX" type="xs:integer" use="required"/>
+			<xs:attribute name="NAME" type="xs:NCName" use="required"/>
+			<xs:attribute name="SLOPE" type="xs:NCName" use="required"/>
+			<xs:attribute name="SOURCE" type="xs:NCName" use="required"/>
+			<xs:attribute name="TMAX" type="xs:integer" use="required"/>
+			<xs:attribute name="TN" type="xs:integer" use="required"/>
+			<xs:attribute name="TYPE" type="xs:NCName" use="required"/>
+			<xs:attribute name="UNITS" use="required"/>
+			<xs:attribute name="VAL" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EXTRA_DATA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EXTRA_ELEMENT" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EXTRA_ELEMENT">
+		<xs:complexType>
+			<xs:attribute name="NAME" type="xs:NCName" use="required"/>
+			<xs:attribute name="VAL" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

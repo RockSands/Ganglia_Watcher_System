@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="cpuMetricInfo">
+	<typeAlias alias="cpuMetricInfor" type="com.ganglia.watcher.db.bean.cpu.CpuMetricInfo" />
+
+	<insert id="insertCpuMetricInfo" parameterClass="cpuMetricInfor">
+		INSERT INTO
+			ebs_cpu_metric_info_t(
+			CPU_METIRC_ID,
+			PC_ID,
+			USERATE,
+			REPORT_TIME,
+			CREATE_TIME
+			)
+		VALUES(
+			#cpuMetricId#,
+			#pcId#,
+			#user#,
+			str_to_date(#reportTime#, '%Y-%m-%d %H:%i:%S'),
+			str_to_date(#createTime#, '%Y-%m-%d %H:%i:%S')
+		);
+	</insert>
+</sqlMap>
+	

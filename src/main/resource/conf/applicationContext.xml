@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+    <!-- 配置文件 -->
+    <bean id="propertyConfigurer"
+		class="com.cmcc.bcebs.watcher.common.TrimPropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<!-- 正式环境 -->
+				
+				<value>file:conf/jdbc_config.properties</value>
+				<value>file:conf/config.properties</value>
+				<value>file:conf/log4j.properties</value>
+				
+				<!-- 开发环境 -->
+				<!--
+				<value>classpath:conf/jdbc_config.properties</value>
+				<value>classpath:conf/config.properties</value>
+				<value>classpath:log4j.properties</value>
+				-->
+			</list>
+		</property>
+	</bean>
+    <!-- 配置数据库数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" >
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+	    <property name="url"><value>${jdbc.url}</value></property>
+		<property name="username"><value>${jdbc.username}</value></property>
+		<property name="password"><value>${jdbc.password}</value></property>
+		<property name="maxActive"><value>${jdbc.maxActive}</value></property>
+		<property name="maxIdle"><value>${jdbc.maxIdle}</value></property>
+		<property name="maxWait"><value>${jdbc.maxWait}</value></property>
+		<property name="defaultAutoCommit"><value>${jdbc.defaultAutoCommit}</value></property>
+	    <property name="timeBetweenEvictionRunsMillis"><value>${jdbc.timeBetweenEvictionRunsMillis}</value></property>
+		<property name="minEvictableIdleTimeMillis"><value>${jdbc.minEvictableIdleTimeMillis}</value></property>
+		<property name="validationQuery"><value>${jdbc.validationQuery}</value></property>
+		<property name="testOnBorrow"><value>${jdbc.testOnBorrow}</value></property>
+		<property name="testOnReturn"><value>${jdbc.testOnReturn}</value></property>
+		<property name="testWhileIdle"><value>${jdbc.testWhileIdle}</value></property>
+	</bean>
+	
+	<!-- 创建SqlSessionFactory，同时指定数据源-->
+    
+    <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<property name="configLocation">
+			<value>classpath:conf/sqlmapconfig.xml</value>
+		</property>
+	</bean>
+    
+    <!-- 配置DAO -->
+    <bean id="ibatisDAO" class="com.cmcc.bcebs.watcher.common.db.ibatis.SqlMapIbatisDAO">
+        <property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+    </bean>
+    
+    <bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+	
+	<bean id="ibatisDAOProxy"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref local="ibatisDAO" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="insert*">PROPAGATION_REQUIRED,-Exception
+				</prop>
+				<prop key="update*">PROPAGATION_REQUIRED,-Exception
+				</prop>
+				<prop key="delete*">PROPAGATION_REQUIRED,-Exception
+				</prop>
+				<prop key="*">PROPAGATION_REQUIRED,readOnly
+				</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="ibatisService" class="com.cmcc.bcebs.watcher.common.db.ibatis.IbatisService"
+		abstract="false">
+		<property name="ibatisDAO">
+			<ref bean="ibatisDAOProxy" />
+		</property>
+	</bean>
+	<!-- 数据库配置 -->
+	
+	<!-- spring线程池配置 -->
+	<bean id="ebsWatcherPool"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<!-- 核心线程数 -->
+		<property name="corePoolSize" value="3" />
+		<!-- 最大线程数 -->
+		<property name="maxPoolSize" value="5" />
+		<property name="keepAliveSeconds" value="200" />
+		<!--线程池维护线程所允许的空闲时间，默认为60s-->
+		<property name="queueCapacity" value="50" />
+		<!--队列最大长度(若有调度时，该值一般需要>=notifyScheduledMainExecutor.maxNum)-->
+		<!-- 线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy；默认为后者-->
+		<!--AbortPolicy:直接抛出java.util.concurrent.RejectedExecutionException异常-->
+		<!--CallerRunsPolicy:主线程直接执行该任务，执行完之后尝试添加下一个任务到线程池中，可以有效降低向线程池内添加任务的速度-->
+		<!-- DiscardOldestPolicy:抛弃旧的任务、暂不支持；会导致被丢弃的任务无法再次被执行 -->
+		<!-- DiscardPolicy:抛弃当前任务、暂不支持；会导致被丢弃的任务无法再次被执行 -->
+		<property name="rejectedExecutionHandler">
+			<bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+		</property>
+	</bean>
+    <!-- 定时任务数据源 Socket -->
+    <bean id="socketDataSource" class="com.cmcc.bcebs.watcher.common.source.SocketAddressDataSource">
+    	<property name="ip"><value>${collect.ip}</value></property>
+    	<property name="port"><value>${collect.port}</value></property>
+    	<property name="collectTimeOut"><value>${collect.timeout}</value></property>
+    </bean>
+    <!-- 定时任务数据源 文件读取 -->
+    <!-- 
+    <bean id="fileDataSource" class="com.cmcc.bcebs.watcher.common.source.FileDataSource">
+    	<property name="filePath">
+    		<value>/src/main/resource/conf/test.xml</value>
+    	</property>
+    </bean>
+     -->
+    <!-- Metric信息解析器 -->
+    <bean id="metricResoluter" class="com.cmcc.bcebs.watcher.metric.MetricResoluter" abstract="true"/>
+    <bean id="diskIOMetricResoluter" class="com.cmcc.bcebs.watcher.metric.DiskIOMetricResoluter" parent="metricResoluter" scope="singleton">
+    <property name="startWidthStr">
+    		<value>${metric.diskIO.startwith}</value>
+    	</property>
+    </bean>
+    <bean id="diskstatMetricResoluter" class="com.cmcc.bcebs.watcher.metric.DiskstatMetricResoluter" parent="metricResoluter" scope="singleton">
+    	<property name="startWidthStr">
+    		<value>${metric.diskStatus.startwith}</value>
+    	</property>
+    </bean>
+    <bean id="netcardIOMetricResoluter" class="com.cmcc.bcebs.watcher.metric.NetcardIOMetricResoluter" parent="metricResoluter" scope="singleton">
+    	<property name="startWidthStr">
+    		<value>${metric.network.startwith}</value>
+    	</property>
+    </bean>
+    <!-- 服务进程解析器 -->
+    <bean id="servicestatMetricResoluter" class="com.cmcc.bcebs.watcher.metric.ServicestatMetricResoluter" parent="metricResoluter" scope="singleton">
+    	<property name="startWidthStr">
+    		<value>${metric.service.startwith}</value>
+    	</property>
+    	<property name="dao">
+    		<ref bean="ibatisDAOProxy"/>
+    	</property>
+    </bean>
+    <!-- CPU解析器 -->
+    <bean id="cpuMetricResoluter" class="com.cmcc.bcebs.watcher.metric.CpuMetricResoluter" parent="metricResoluter" scope="singleton">
+    	<property name="startWidthStr">
+    		<value>${metric.cpu.startwith}</value>
+    	</property>
+    </bean>
+    <!-- 内存解析器 -->
+    <bean id="memoryMetricResoluter" class="com.cmcc.bcebs.watcher.metric.MemoryMetricResoluter" parent="metricResoluter" scope="singleton">
+    	<property name="startWidthStr">
+    		<value>${metric.memory.startwith}</value>
+    	</property>
+    </bean>        
+    <!-- PC机信息处理器 -->
+    <bean id="hostProcessor" class="com.cmcc.bcebs.watcher.metric.HostResoluter" scope="singleton">
+    	<property name="dao">
+    		<ref bean="ibatisDAOProxy"/>
+    	</property>
+    	<property name="hostResolvePool">
+    		<ref bean="ebsWatcherPool"/>
+    	</property>
+    	<property name="metricResoluters">
+    		<list>
+    			<ref bean="diskIOMetricResoluter"/>
+    			<ref bean="diskstatMetricResoluter"/>
+    			<ref bean="netcardIOMetricResoluter"/>
+    			<ref bean="servicestatMetricResoluter"/>
+    			<ref bean="cpuMetricResoluter"/>
+    			<ref bean="memoryMetricResoluter"/>
+    		</list>
+    	</property>
+    </bean>
+    
+    <!-- java定时器任务 -->  
+    <bean id="collectServNodeMetricTask" class="com.cmcc.bcebs.watcher.task.CollectServNodeMetricTask" >
+    	<property name="dataSource">
+    		<ref bean="socketDataSource"/>
+    	</property>
+    	<property name="processor">
+    		<ref bean="hostProcessor"/>
+    	</property>
+    	<property name="dateWriteFileFlg">
+    		<value>${collect.dateWriteFileFlg}</value>
+    	</property>
+    </bean>
+    
+    <!-- 注入定时容器 -->  
+	<bean id="scheduleMetricTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+		<property name="timerTask" ref="collectServNodeMetricTask" />
+		<!-- 初始启动延时时间 -->
+		<property name="delay">
+			<value>${collect.task.delay}</value>
+		</property>
+		<!-- 频率间隔时间 -->
+		<property name="period">
+			<value>${collect.task.period}</value>
+		</property>
+	</bean>
+	
+	<!-- Spring的TimerFactoryBean负责启动定时任务 -->  
+    <bean class="org.springframework.scheduling.timer.TimerFactoryBean">  
+        <property name="scheduledTimerTasks">  
+            <list>  
+                <ref bean="scheduleMetricTask" />  
+            </list>  
+        </property>  
+    </bean>  
+</beans>

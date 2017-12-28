@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig 
+   PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN" 
+   "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<settings cacheModelsEnabled="true" enhancementEnabled="true"
+		lazyLoadingEnabled="true" maxRequests="32" maxSessions="10"
+		maxTransactions="5" useStatementNamespaces="true" />
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/disk/DiskInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/pc/PcInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/netcard/NetcardInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/process/ServiceInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/disk/DiskMetricInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/netcard/NetcardMetricInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/process/ServicesMetricInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/fault/FaultInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/cpu/CpuMetricInfo.xml"/>
+    <sqlMap resource="com/cmcc/bcebs/watcher/db/bean/memory/MemoryMetricInfo.xml"/>
+</sqlMapConfig>

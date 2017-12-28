@@ -1,0 +1,28 @@
+start()
+{
+        cd /home/gangliaadmin/Ganglia_Watcher_System
+        ./startup.sh
+}
+
+stop()
+{
+        cd /home/gangliaadmin/Ganglia_Watcher_System
+        ./shutdown.sh
+}
+
+rtrn=0
+
+case "$1" in
+start)
+        start
+;;
+stop)
+        stop
+;;
+*)
+        echo "usage: $0 {start|stop}"
+        rtrn=2
+;;
+esac
+
+exit $rtrn

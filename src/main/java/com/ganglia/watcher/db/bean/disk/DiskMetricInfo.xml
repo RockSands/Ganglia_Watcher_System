@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="diskMetricInfo">
+	<typeAlias alias="diskMetricInfor" type="com.cmcc.bcebs.watcher.db.bean.disk.DiskMetricInfo" />
+
+	<insert id="insertDiskMetricInfo" parameterClass="diskMetricInfor">
+		INSERT INTO
+			ebs_disk_metric_info_t(
+			DISK_METRIC_ID,
+			DISK_ID,
+			REPORT_TIME,
+			KERNEL,
+			SWAP,
+			HEALTH,
+			READ_BYTES_PER_SEC,
+			WRITE_BYTES_PER_SEC,
+			READ_COUNT,
+			WRITE_COUNT,
+			TEMPERATURE,
+			AIRFLOW_TEMPERATURE,
+			RAW_READ_ERROR_RATE,
+			CURRENT_PENDING_SECTOR_COUNT,
+			REALLOCATED_SECTOR_COUNT,
+			UNCORRECTABLE_SECTOR_COUNT,
+			END_TO_END_ERROR,
+			COMMAND_TIMEOUT,
+			SEEK_ERROR_RATE,
+			SPIN_RETRY_COUNT,
+			CREATE_TIME
+			)
+		VALUES(
+			#disk_metric_id#,
+			#disk_id#,
+			#report_time#,
+			#kernel#,
+			#swap#,
+			#health#,
+			#readBytes#,
+			#writeBytes#,
+			#reads#,
+			#writes#,
+			#temperature#,
+			#airflow_temperature#,
+			#raw_read_error_rate#,
+			#current_pending_sector_counte#,
+			#reallocated_sector_count#,
+			#uncorrectable_sector_count#,
+			#end_to_end_error#,
+			#command_timeout#,
+			#seek_error_rate#,
+			#spin_retry_count#,
+			str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S')
+		);
+	</insert>
+</sqlMap>
+	

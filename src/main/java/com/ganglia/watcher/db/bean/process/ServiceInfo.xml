@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="serviceInfo">
+	<typeAlias alias="serviceInfor" type="com.cmcc.bcebs.watcher.db.bean.process.ServiceInfo" />
+	<select id="getServiceListByPCID" parameterClass="String" resultClass="serviceInfor">
+		SELECT 
+			SERVICE_ID as service_id, 
+			PC_ID as pc_id, 
+			NAME as name,
+			STATUS as status,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_service_info_t
+		WHERE pc_id=#pc_id#
+	</select>
+	
+	<insert id="insertServiceInfo" parameterClass="serviceInfor">
+		INSERT INTO
+			ebs_ps_service_info_t(
+			SERVICE_ID,
+			PC_ID,
+			NAME,
+			STATUS,
+			CREATE_TIME,
+			UPDATE_TIME
+			)
+		VALUES(#service_id#,#pc_id#,#name#,#status#,str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S'),str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S'));
+	</insert>
+	
+	<update id="updateServiceInfo" parameterClass="serviceInfor">
+		UPDATE ebs_ps_service_info_t 
+		SET <isNotEmpty property="pc_id">
+				PC_ID = #pc_id#,
+			</isNotEmpty>
+			<isNotEmpty property="name">
+				NAME = #name#,
+			</isNotEmpty>
+			<isNotEmpty property="status">
+				STATUS = #status#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE SERVICE_ID = #service_id#
+	</update>
+</sqlMap>
+	

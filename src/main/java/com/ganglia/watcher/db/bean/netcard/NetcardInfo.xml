@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="netcardInfo">
+	<typeAlias alias="netcardInfor" type="com.cmcc.bcebs.watcher.db.bean.netcard.NetcardInfo" />
+	<typeAlias alias="String" type="java.lang.String" />
+	<select id="getNetcardListByPCID" parameterClass="String" resultClass="netcardInfor">
+		SELECT 
+			NETCARD_ID as netcard_id, 
+			PC_ID as pc_id, 
+			NAME as name,
+			USE_TYPE as use_type,
+			IP as ip,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_netcard_info_t
+		WHERE pc_id=#pc_id#
+	</select>
+	
+	<insert id="insertNetcardInfo" parameterClass="netcardInfor">
+		INSERT INTO
+			ebs_ps_netcard_info_t(
+			NETCARD_ID,
+			PC_ID,
+			NAME,
+			USE_TYPE,
+			IP,
+			CREATE_TIME,
+			UPDATE_TIME
+			)
+		VALUES (
+			#netcard_id#,
+			#pc_id#,
+			#name#,
+			#use_type#,
+			#ip#,
+			str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S'),
+			str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		);
+	</insert>
+	
+	<update id="updateNetcardInfo" parameterClass="netcardInfor">
+		UPDATE ebs_ps_netcard_info_t 
+		SET <isNotEmpty property="pc_id">
+				PC_ID = #pc_id#,
+			</isNotEmpty>
+			<isNotEmpty property="name">
+				NAME = #name#,
+			</isNotEmpty>
+			<isNotEmpty property="use_type">
+				USE_TYPE = #use_type#,
+			</isNotEmpty>
+			<isNotEmpty property="ip">
+				IP = #ip#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE NETCARD_ID = #netcard_id#
+	</update>
+</sqlMap>
+	

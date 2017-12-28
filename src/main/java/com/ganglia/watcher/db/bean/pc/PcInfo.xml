@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="pcInfo">
+	<typeAlias alias="pcInfor" type="com.cmcc.bcebs.watcher.db.bean.pc.PcInfo" />
+	<typeAlias alias="clusterNodeInfor" type="com.cmcc.bcebs.watcher.db.bean.pc.ClusterNodeInfo" />
+	<typeAlias alias="shdNodeInfor" type="com.cmcc.bcebs.watcher.db.bean.pc.ShdNodeInfo" />
+	<typeAlias alias="String" type="java.lang.String" />
+	<select id="queryPcInfoByHostname" parameterClass="String" resultClass="pcInfor">
+		SELECT 
+			PC_ID pc_id,
+			HOST_NAME host_name,
+			IP_ADDRESS_BUSINESS ip_address_bussiness,
+			IP_ADDRESS_DATA_STORAGE ip_address_data_storage,
+			SHH_USER shh_user,
+			SHH_PASSWORD ssh_password,
+			STATUS_USED status_used,
+			STATUS_AVAILABLE status_available,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_pc_node_info_t
+		WHERE host_name=#host_name#
+	</select>
+	<select id="queryPcInfoByBussinessIP" parameterClass="String" resultClass="pcInfor">
+		SELECT 
+			PC_ID pc_id,
+			HOST_NAME host_name,
+			IP_ADDRESS_BUSINESS ip_address_bussiness,
+			IP_ADDRESS_DATA_STORAGE ip_address_data_storage,
+			SHH_USER shh_user,
+			SHH_PASSWORD ssh_password,
+			STATUS_USED status_used,
+			STATUS_AVAILABLE status_available,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_pc_node_info_t
+		WHERE IP_ADDRESS_BUSINESS = #ip#
+	</select>
+	
+	<select id="querySHDByPcId" parameterClass="String" resultClass="shdNodeInfor">
+		SELECT 
+			SERVICE_NODE_ID service_node_id,
+			SHD_NODE_ID shd_node_id,
+			PC_ID pc_id,
+			STATUS_STARTUP status_startup,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_shd_node_info_t
+		WHERE PC_ID = #pc_id#
+	</select>
+	
+	<select id="queryClusterNodeByPcId" parameterClass="String" resultClass="clusterNodeInfor">
+		SELECT 
+			CLUSTER_NODE_ID cluster_node_id,
+			PC_ID pc_id,
+			ZOO_SERVER_ID zoo_server_id,
+			STATUS_STARTUP status_startup,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_cluster_node_info_t
+		WHERE PC_ID = #pc_id#
+	</select>
+	
+	<select id="getAllPcInfo" resultClass="pcInfor">
+		SELECT 
+			PC_ID pc_id,
+			HOST_NAME host_name,
+			IP_ADDRESS_BUSINESS ip_address_bussiness,
+			IP_ADDRESS_DATA_STORAGE ip_address_data_storage,
+			SHH_USER shh_user,
+			SHH_PASSWORD ssh_password,
+			STATUS_USED status_used,
+			STATUS_AVAILABLE status_available,
+			DATE_FORMAT(CREATE_TIME,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%S') as update_time
+		FROM ebs_ps_pc_node_info_t
+	</select>
+
+	<update id="updatePcInfo" parameterClass="pcInfor">
+		UPDATE ebs_ps_pc_node_info_t 
+		SET <isNotEmpty property="status_available">
+				STATUS_AVAILABLE = #status_available#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE PC_ID=#pc_id#;
+	</update>
+	
+	<update id="updateClusterNodeInfo" parameterClass="clusterNodeInfor">
+		UPDATE ebs_ps_cluster_node_info_t 
+		SET <isNotEmpty property="status_startup">
+			STATUS_STARTUP = #status_startup#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE CLUSTER_NODE_ID=#cluster_node_id#;
+	</update>
+	
+	<update id="updateClusterNodeInfoByPcId" parameterClass="clusterNodeInfor">
+		UPDATE ebs_ps_cluster_node_info_t 
+		SET <isNotEmpty property="status_startup">
+			STATUS_STARTUP = #status_startup#,
+			</isNotEmpty>
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+		WHERE PC_ID=#pc_id#;
+	</update>
+	
+	<update id="updateShdNodeInfo" parameterClass="shdNodeInfor">
+		UPDATE ebs_ps_shd_node_info_t 
+		SET <isNotEmpty property="status_startup">
+				STATUS_STARTUP = #status_startup#,
+			</isNotEmpty>
+				UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+			WHERE SHD_NODE_ID=#shd_node_id#;
+	</update>
+	
+	<update id="updateShdNodeInfoByPcId" parameterClass="shdNodeInfor">
+		UPDATE ebs_ps_shd_node_info_t 
+		SET <isNotEmpty property="status_startup">
+				STATUS_STARTUP = #status_startup#,
+			</isNotEmpty>
+				UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+			WHERE PC_ID=#pc_id#;
+	</update>
+	
+	<update id="updateAvailableFaultByHostName" parameterClass="pcInfor">
+		UPDATE ebs_ps_pc_node_info_t 
+		SET STATUS_AVAILABLE = #status_available#,
+			UPDATE_TIME = str_to_date(#update_time#, '%Y-%m-%d %H:%i:%S')
+			WHERE HOST_NAME=#host_name#;
+	</update>
+	
+	<select id="queryStopNowPC" parameterClass="String" resultClass="String">
+		SELECT 
+			COUNT(*)
+		FROM ebs_ps_shd_node_info_t
+		WHERE STATUS_STARTUP = "4"
+	</select>
+</sqlMap>
+	

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="netcardMetricInfo">
+	<typeAlias alias="netcardMetricInfor" type="com.cmcc.bcebs.watcher.db.bean.netcard.NetcardMetricInfo" />
+
+	<insert id="insertNetcardMetricInfo" parameterClass="netcardMetricInfor">
+		INSERT INTO
+			ebs_netcard_metric_info_t(
+			NETCARD_METRIC_ID,
+			NETCARD_ID,
+			REPORT_TIME,
+			BYTES_IN,
+			BYTES_OUT,
+			CREATE_TIME
+			)
+		VALUES(
+			#netcard_metric_id#,
+			#netcard_id#,
+			#report_time#,
+			#bytesIn#,
+			#bytesOut#,
+			str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S')
+		);
+	</insert>
+</sqlMap>
+	

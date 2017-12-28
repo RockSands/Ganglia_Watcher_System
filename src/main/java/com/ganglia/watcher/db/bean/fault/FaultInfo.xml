@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="faultInfo">
+	<typeAlias alias="faultInfor" type="com.cmcc.bcebs.watcher.db.bean.fault.FaultInfo" />
+	<typeAlias alias="String" type="java.lang.String" />
+	
+	<insert id="insertFaultInfo" parameterClass="faultInfor">
+		INSERT INTO
+			ebs_ps_fault_info_t (
+				PC_ID,
+				FAULT_TYPE,
+				FAULT_INFO,
+				CREATE_TIME
+			) VALUES (
+				#pc_id#,
+				#fault_type#,
+				#fault_info#,
+				str_to_date(#create_time#, '%Y-%m-%d %H:%i:%S')
+			);
+	</insert>
+</sqlMap>
+	
